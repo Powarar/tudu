@@ -1,26 +1,36 @@
 import tasks
-if __name__ == "__main__":
+
+def menu():
     print(
     """
 'stop' - to end program
 'help' - to see all commands
 'listall' - to see all tasks
-'add [task]' - to add task,
-also 'delete', change and listall
+'add' - to add task,
+'delete' - to remove task,
+change and listall
     """)
+
+if __name__ == "__main__":
+    tasks.create_db()
+    tasks.init_db()
+    menu()
     while True:
-        input_command = input("-~-").split()
+        input_command = input("-~-").strip().lower()
         if input_command: 
-            if input_command[0] == 'stop':
+            if input_command == 'stop':
                 break
+            elif input_command == 'help':
+                menu()
 
-            if input_command[0] == 'add':
-                tasks.add_task(tasks.Task(input_command[1]))
-                tasks.list_tasks()
+            elif input_command == 'add':
+                tasks.add_task()
         
-            if input_command[0] == 'delete':
-                tasks.delete_task(int(input_command[1]))
-                tasks.list_tasks()
+            elif input_command == 'delete':
+                tasks.delete_task()
 
-            if input_command[0] == 'listall':
+            elif input_command == 'update':
+                tasks.toggle_task()
+
+            elif input_command == 'listall':
                 tasks.list_tasks()
