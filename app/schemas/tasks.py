@@ -2,14 +2,14 @@ from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 class TaskBase(BaseModel):
-    taskname: str
-    description: str | None
+    title: str
+    description: str | None = None
 
 class TaskCreate(TaskBase):
     pass
     
 class TaskUpdate(TaskBase):
-    taskname: str | None
+    title: str | None
     description: str | None
     is_completed: bool | None
 

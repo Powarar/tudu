@@ -15,12 +15,12 @@ async def get_user_by_uuid(user_id: UUID) -> UserDB | None:
     stmt = select(UserDB).where(UserDB.id == user_id)
     return await db_engine.select_one(stmt)
 
-async def get_user_by_username(username: UUID) -> UserDB | None:
+async def get_user_by_username(username: str) -> UserDB | None:
     stmt = select(UserDB).where(UserDB.username == username)
     return await db_engine.select_one(stmt)
 
 async def update_user( user_uuid: UUID, user_data: dict):
-    stmp = update(UserDB).where(UserDB.user_uuid == user_uuid).values(**user_data)
+    stmp = update(UserDB).where(UserDB.id == user_uuid).values(**user_data)
     await db_engine.execute(stmp, no_return=True)
 
 async def create_or_update_user( user_data: dict) -> UserDB:

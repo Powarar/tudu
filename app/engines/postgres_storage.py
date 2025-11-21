@@ -44,35 +44,35 @@ class PostgresEngine:
             log.error(msg=f'PostgresEngine: method drop_tables crashed: {err.orig}', exc_info=False)
 
     async def execute(self, stmt: Any, no_return: bool = False, return_many: bool = False) -> Any:
-        try:
-            async with self.async_session() as session:
-                cursor: AsyncResult = await session.execute(stmt)  # noqa
-                await session.commit()
-                if no_return:
-                    return None
-                if return_many:
-                    return cursor.scalars().all()
-                return cursor.scalar_one_or_none()
-        except IntegrityError as err:
-            log.error(msg=f'PostgresEngine: method execute crashed: {err.__class__.__name__}', exc_info=True)
-            return None
-        except (OperationalError, ProgrammingError, InterfaceError) as err:
-            log.error(msg=f'PostgresEngine: method execute crashed: {err.__class__.__name__}', exc_info=False)
-            return None
-
-    async def select_one(self, stmt: BaseDB) -> Any:
-        result = await self.select(stmt)
-        return result[0] if result else None
+            try:
+                async with self.async_session() as session:
+                    cursor: AsyncResult = await session.execute(stmt)  # noqa
+                    await session.commit()
+                    if no_return:
+                        return None
+                    if return_many:
+                        return cursor.scalars().all() 
+                    return cursor.scalar_one_or_none()
+            except IntegrityError as err:
+                log.error(msg=f'PostgresEngine: method execute crashed: {err.__class__.__name__}', exc_info=True)
+                return None
+            except (OperationalError, ProgrammingError, InterfaceError) as err:
+                log.error(msg=f'PostgresEngine: method execute crashed: {err.__class__.__name__}', exc_info=False)
+                return None
 
     async def select(self, stmt: Any, no_scalars: bool = False) -> Any:
         try:
             async with self.async_session() as session:
                 cursor: AsyncResult = await session.execute(stmt)  # noqa
                 if no_scalars:
-                    return cursor.all() or None
-                return cursor.scalars().all() or None
+                    return cursor.all() 
+                return cursor.scalars().all() 
         except (OperationalError, ProgrammingError, InterfaceError) as err:
             log.error(msg=f'PostgresEngine: method select crashed: {err.orig}', exc_info=False)
-            return None
+            return []
+        
+    async def select_one(self, stmt: BaseDB) -> Any:
+        result = await self.select(stmt)
+        return result[0] if result else None
             
 db_engine = PostgresEngine()

@@ -12,10 +12,10 @@ class UserBase(BaseModel):
 
 class UserLogin(BaseModel):
     username: str = Field(min_length=4, max_length=15)
-    password: str = Field(min_length=6, max_length=20)
+    password: str = Field(min_length=4, max_length=20)
 
 class UserRegister(UserBase):
-    password: str = Field(min_length=6, max_length=20)
+    password: str = Field(min_length=4, max_length=20)
 
 
 
