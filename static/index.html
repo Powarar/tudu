@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Tudu App</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .hidden { display: none; }
+        .task { border: 1px solid #ddd; padding: 10px; margin: 5px 0; display: flex; justify-content: space-between; }
+        input { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { padding: 8px 15px; cursor: pointer; background-color: #28a745; color: white; border: none; }
+        button.delete { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h2>Вход</h2>
+        <input type="text" id="username" placeholder="Логин">
+        <input type="password" id="password" placeholder="Пароль">
+        <button onclick="login()">Войти</button>
+        <button onclick="toggleRegister()" style="background-color: #007bff">Нет аккаунта? Регистрация</button>
+    </div>
+
+    <div id="register-screen" class="hidden">
+        <h2>Регистрация</h2>
+        <input type="text" id="reg-username" placeholder="Логин">
+        <input type="text" id="reg-firstname" placeholder="Имя">
+        <input type="text" id="reg-lastname" placeholder="Фамилия">
+        <input type="password" id="reg-password" placeholder="Пароль">
+        <button onclick="register()">Зарегистрироваться</button>
+        <button onclick="toggleRegister()" style="background-color: #6c757d">Назад</button>
+    </div>
+
+    <div id="app-screen" class="hidden">
+        <h2 id="user-welcome">Мои задачи</h2>
+        <div>
+            <input type="text" id="task-title" placeholder="Название задачи (title)">
+            <input type="text" id="task-desc" placeholder="Описание">
+            <button onclick="createTask()">Добавить</button>
+        </div>
+        <div id="tasks-list"></div>
+        <br>
+        <button onclick="logout()" style="background-color: #6c757d">Выйти</button>
+    </div>
+
+    <script>
+        const API_URL = "";
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const res = await fetch('/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            });
+
+            if (res.ok) {
+                showApp();
+            } else {
+                alert('Ошибка входа');
+            }
+        }
+
+        async function register() {
+            const data = {
+                username: document.getElementById('reg-username').value,
+                first_name: document.getElementById('reg-firstname').value,
+                last_name: document.getElementById('reg-lastname').value,
+                password: document.getElementById('reg-password').value
+            };
+            
+            const res = await fetch('/auth/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                alert('Успешно! Теперь войдите.');
+                toggleRegister();
+            } else {
+                alert('Ошибка регистрации');
+            }
+        }
+
+        async function createTask() {
+            const title = document.getElementById('task-title').value;
+            const description = document.getElementById('task-desc').value;
+
+            await fetch('/tasks/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title, description})
+            });
+            loadTasks();
+            document.getElementById('task-title').value = '';
+        }
+
+        async function loadTasks() {
+            const res = await fetch('/tasks/');
+            if (res.ok) {
+                const tasks = await res.json();
+                const list = document.getElementById('tasks-list');
+                list.innerHTML = '';
+                tasks.forEach(t => {
+                    list.innerHTML += `
+                        <div class="task">
+                            <div><b>${t.title}</b><br>${t.description || ''}</div>
+                            <button class="delete" onclick="deleteTask('${t.id}')">X</button>
+                        </div>`;
+                });
+            } else {
+                // Если токен истек
+                showLogin();
+            }
+        }
+
+        async function deleteTask(id) {
+            await fetch(`/tasks/${id}`, { method: 'DELETE' });
+            loadTasks();
+        }
+
+        function showApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            loadTasks();
+        }
+
+        function showLogin() {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('app-screen').classList.add('hidden');
+        }
+
+        function toggleRegister() {
+            document.getElementById('login-screen').classList.toggle('hidden');
+            document.getElementById('register-screen').classList.toggle('hidden');
+        }
+        
+        function logout() {
+            // Удаляем куку (простой способ)
+            document.cookie = "users_access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            showLogin();
+        }
+
+        // Проверка при загрузке: пробуем загрузить задачи, если ок - показываем апп
+        loadTasks().then(res => {
+           if(document.getElementById('tasks-list').innerHTML !== "") showApp(); 
+        });
+    </script>
+</body>
+</html>

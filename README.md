@@ -1,84 +1,195 @@
-Task Manager CLI 
 
-Описание:
-Консольное Python-приложение для управления списком задач
-с использованием PostgreSQL в качестве хранилища данных.
-Позволяет добавлять, удалять, переключать статус задач и просматривать их.
 
----
+# 📘 **Tudu — FastAPI ToDo App**
 
-Функции:
-
-- Добавление новой задачи
-- Удаление задачи по ID
-- Переключение статуса задачи (выполнено / не выполнено)
-- Просмотр всех задач
-- Хранение данных в PostgreSQL
-- .env-файл для конфиденциальных настроек
+Асинхронное приложение задач с авторизацией через JWT (cookie), PostgreSQL и FastAPI.
 
 ---
 
-Установка:
+## 🚀 Возможности
 
-0. Установите необходимые зависимости:
-`pip install -r requirements.txt`
-
-1. Создайте файл `.env` в корневой папке со следующим содержанием:
-   
-DB_NAME=tasks  
-DB_USER=postgres  
-DB_PASSWORD=your_password  
-DB_HOST=localhost  
-DB_PORT=5432  
-
-2. Убедитесь, что PostgreSQL установлен и запущен.
-
-3. Создайте базу данных:
-
-Через psql:
-    psql -U postgres -h localhost  
-    CREATE DATABASE tasks;
-
-Или через код:
-    при первом запуске `main.py` база создастся автоматически, если её нет.
+* Регистрация / Логин
+* Хеширование паролей (bcrypt)
+* JWT-токен в HttpOnly cookie
+* Работа с задачами (создание, получение, удаление)
+* Асинхронный стек: FastAPI + SQLAlchemy 2.0 + asyncpg
+* Pydantic v2
+* Poetry как менеджер зависимостей
 
 ---
 
-Запуск:
+# 📁 **Структура проекта**
 
-    python main.py
-
----
-
-Команды CLI:
-
-    add       — добавить новую задачу
-    delete    — удалить задачу по ID
-    update    — переключить статус (выполнено / не выполнено)
-    listall   — показать все задачи
-    help      — список команд
-    stop      — выход из программы
-
----
-
-Структура таблицы tasks:
-
-CREATE TABLE IF NOT EXISTS tasks (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    description TEXT DEFAULT 'not added',
-    category TEXT DEFAULT 'not added',
-    deadline TEXT DEFAULT 'indefinitely',
-    status BOOLEAN DEFAULT FALSE,
-    date_created DATE DEFAULT CURRENT_DATE
-);
+```
+tudu/
+│
+├── app/
+│   ├── routers/           # эндпоинты auth/tasks
+│   ├── models/            # SQLAlchemy ORM-модели
+│   ├── schemas/           # Pydantic-схемы
+│   ├── repositories/      # Работа с базой
+│   ├── engines/           # PostgresEngine
+│   ├── auth/              # JWT, hashing, dependencies
+│   ├── settings.py        # загрузка ENV
+│   └── main.py            # точка входа FastAPI
+│
+├── static/                # фронтенд HTML/JS
+├── .env                   # конфигурация БД и JWT
+├── pyproject.toml         # Poetry зависимости
+├── .gitignore             # Неотслеживаемые гитом файлы
+└── README.md              # этот файл
+```
 
 ---
 
-Поддержка:
+# 🛠 **1. Требования**
 
-- Убедитесь, что PostgreSQL сервер запущен.
-- Проверьте правильность данных подключения в `.env`.
-- Убедитесь, что база данных `tasks` существует или используйте `create_database_if_not_exists()` перед `init_db()`.
+* Python **3.13+**
+* Poetry **1.7+**
+* PostgreSQL **14+**
 
-Проект может быть расширен для работы через REST API, но по умолчанию ориентирован на удобную работу из терминала.
+---
+
+# ⚙️ **2. Настройка окружения**
+
+## 2.1. Клонировать проект
+
+```bash
+git clone https://github.com/Powarar/tudu.git
+cd tudu
+```
+
+## 2.2. Установить зависимости
+
+```bash
+poetry install
+```
+
+## 2.3. Активировать виртуальное окружение Poetry
+
+```bash
+poetry env activate
+```
+
+---
+
+# 🔧 **3. Конфигурация (.env)**
+
+В корне проекта должен быть `.env`:
+
+```
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_NAME=TUDU
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password
+
+SECRET_KEY=your_key
+ALGORITHM=HS256
+```
+
+# 📌 **4. Создайте базу данных**:
+
+### Linux / macOS:
+
+```bash
+sudo -u postgres psql -c "CREATE DATABASE TUDU;"
+```
+
+### Windows (psql):
+
+```bash
+psql -U postgres -c "CREATE DATABASE TUDU;"
+```
+
+Проверь доступ:
+
+```bash
+psql -U postgres -d TUDU -c "\dt"
+```
+
+---
+
+# ▶️ **5. Запуск приложения**
+
+```bash
+poetry run uvicorn app.main:app --reload
+```
+
+По умолчанию сервер поднимется на:
+
+```
+http://127.0.0.1:8000
+```
+
+---
+
+# 🌐 **6. Фронтенд**
+
+Открыть файл:
+
+```
+/static/index.html
+```
+
+или перейти в браузере:
+
+```
+http://127.0.0.1:8000/static/index.html
+```
+
+Фронт полностью написан на чистом HTML+JS.
+
+
+# 📡 **7. Эндпоинты (API)**
+
+## 🔐 Авторизация
+
+### Регистрация
+
+`POST /auth/register`
+
+Body:
+
+```json
+{
+  "username": "ivan",
+  "first_name": "Иван",
+  "last_name": "Иванов",
+  "password": "password123"
+}
+```
+
+### Логин
+
+`POST /auth/login`
+
+Сервер отправляет cookie:
+`users_access_token=<JWT>`
+
+---
+
+## 📝 Задачи
+
+### Получить задачи
+
+`GET /tasks/`
+(требует авторизацию)
+
+### Создать задачу
+
+`POST /tasks/`
+
+```json
+{
+  "title": "Купить хлеб",
+  "description": "вечером"
+}
+```
+
+### Удалить задачу
+
+`DELETE /tasks/{id}`
+
+---
+Первая рабочая версия. Могут быть ошибки из-за валидации в схемах. Фронтенд навайбкоден)
