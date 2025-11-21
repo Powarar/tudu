@@ -88,18 +88,7 @@ SECRET_KEY=your_key
 ALGORITHM=HS256
 ```
 
-## 📌 Как работает загрузка .env
-
-В `Settings` прописано:
-
-```python
-model_config = SettingsConfigDict(
-    env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
-)
-
-# 🗄 **4. Настройка PostgreSQL**
-
-Создайте базу данных:
+# 📌 **4. Создайте базу данных**:
 
 ### Linux / macOS:
 
